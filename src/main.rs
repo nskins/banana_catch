@@ -3,7 +3,13 @@ use bevy::window::PrimaryWindow;
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            primary_window: Some(Window {
+                resolution: (1600., 1000.).into(),
+                ..default()
+            }),
+            ..default()
+        }))
         .add_startup_system(spawn_basket)
         .add_startup_system(spawn_camera)
         .run();
