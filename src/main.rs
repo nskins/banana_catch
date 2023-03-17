@@ -6,6 +6,7 @@ fn main() {
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 resolution: (1600., 1000.).into(),
+                resizable: false,
                 ..default()
             }),
             ..default()
@@ -27,7 +28,7 @@ pub fn spawn_basket(
 
     commands.spawn((
         SpriteBundle {
-            transform: Transform::from_xyz(window.width() / 2.0, window.height() / 2.0, 0.0),
+            transform: Transform::from_xyz(window.width() / 2.0, 120.0, 0.0),
             texture: asset_server.load("sprites/bucket.png"),
             ..default()
         },
