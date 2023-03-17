@@ -13,6 +13,7 @@ fn main() {
         }))
         .add_startup_system(spawn_basket)
         .add_startup_system(spawn_camera)
+        .add_system(update_basket_position)
         .run();
 }
 
@@ -46,5 +47,16 @@ pub fn spawn_camera(
         transform: Transform::from_xyz(window.width() / 2.0, window.height() / 2.0, 0.0),
         ..default()
     });
+}
+
+pub fn update_basket_position(
+    mut events: EventReader<CursorMoved>,
+    mut basket_query: Query<&mut Transform, With<Basket>>,
+) {
+    if let Ok(mut transform) = basket_query.get_single_mut() {
+        for event in events.iter() {
+            transform.translation.x = event.position.x;
+        }
+    }
 }
 
