@@ -20,6 +20,7 @@ fn main() {
         .add_startup_system(spawn_camera)
         .add_startup_system(play_music)
         .add_system(banana_movement)
+        .add_system(banana_hit_ground)
         .add_system(tick_banana_spawn_timer)
         .add_system(spawn_bananas_over_time)
         .add_system(update_basket_position)
@@ -53,6 +54,25 @@ pub fn banana_movement(
         let direction = Vec3::new(0.0, -1.0, 0.0);
 
         transform.translation += direction * BANANA_SPEED * time.delta_seconds();
+    }
+}
+
+pub fn banana_hit_ground(
+    mut commands: Commands,
+    mut banana_query: Query<(Entity, &Transform), With<Banana>>,
+) { 
+    let ground_y = Vec3::new(0.0, 0.0, 0.0);
+
+    for (entity, transform) in banana_query.iter_mut() {
+        let entity_y = Vec3::new(0.0, transform.translation.y, 0.0);
+
+        let distance = ground_y.distance(entity_y);
+
+        if distance < 5.0 {
+            println!("Despawning banana!");
+
+            commands.entity(entity).despawn();
+        }
     }
 }
 
