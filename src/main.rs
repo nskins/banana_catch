@@ -24,6 +24,7 @@ fn main() {
         }))
         .init_resource::<BananaSpawnTimer>()
         .init_resource::<Score>()
+        .add_startup_system(spawn_background)
         .add_startup_system(spawn_basket)
         .add_startup_system(spawn_camera)
         .add_startup_system(play_music)
@@ -121,6 +122,22 @@ pub fn play_music(asset_server: Res<AssetServer>, audio: Res<Audio>) {
     audio.play_with_settings(
         asset_server.load("audio/main_theme.ogg"),
         PlaybackSettings::LOOP.with_volume(1.0),
+    );
+}
+
+pub fn spawn_background(
+    mut commands: Commands,
+    window_query: Query<&Window, With<PrimaryWindow>>,
+    asset_server: Res<AssetServer>,
+) {
+    let window = window_query.get_single().unwrap();
+
+    commands.spawn(
+        SpriteBundle {
+            transform: Transform::from_xyz(window.width() / 2.0, window.height() / 2.0, -1.0),
+            texture: asset_server.load("sprites/background.png"),
+            ..default()
+        }
     );
 }
 
