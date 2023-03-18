@@ -2,7 +2,13 @@ use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use rand::prelude::*;
 
-pub const BANANA_SPAWN_TIMER_IN_SECONDS: f32 = 1.0;
+pub const BASKET_WIDTH: f32 = 128.0;
+pub const BANANA_HEIGHT: f32 = 70.0;
+// When you set the `BANANA_SPAWN_TIMER_IN_SECONDS` to 1.0, a bug
+// occurs when you catch a banana at the top of the bucket. The
+// other banana that has "just spawned" will disappear until the
+// next banana spawns. Should look into this more.
+pub const BANANA_SPAWN_TIMER_IN_SECONDS: f32 = 0.5;
 pub const BANANA_SPEED: f32 = 800.0;
 
 fn main() {
@@ -20,6 +26,7 @@ fn main() {
         .add_startup_system(spawn_camera)
         .add_startup_system(play_music)
         .add_system(banana_movement)
+        .add_system(banana_hit_basket)
         .add_system(banana_hit_ground)
         .add_system(tick_banana_spawn_timer)
         .add_system(spawn_bananas_over_time)
@@ -51,6 +58,27 @@ pub fn banana_movement(mut banana_query: Query<(&mut Transform, &Banana)>, time:
         let direction = Vec3::new(0.0, -1.0, 0.0);
 
         transform.translation += direction * BANANA_SPEED * time.delta_seconds();
+    }
+}
+
+pub fn banana_hit_basket(
+    mut commands: Commands,
+    mut banana_query: Query<(Entity, &Transform), With<Banana>>,
+    basket_query: Query<&Transform, With<Basket>>,
+) {
+    if let Ok(basket_transform) = basket_query.get_single() {
+        for (banana_entity, banana_transform) in banana_query.iter_mut() {
+            let distance = banana_transform
+                .translation
+                .distance(basket_transform.translation);
+
+            let basket_radius = BASKET_WIDTH / 2.0;
+            let banana_radius = BANANA_HEIGHT / 2.0;
+
+            if distance < basket_radius + banana_radius {
+                commands.entity(banana_entity).despawn();
+            }
+        }
     }
 }
 
