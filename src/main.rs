@@ -17,6 +17,7 @@ fn main() {
             primary_window: Some(Window {
                 resolution: (1600., 1000.).into(),
                 resizable: false,
+                title: "Banana Catch".to_string(),
                 ..default()
             }),
             ..default()
