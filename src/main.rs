@@ -3,6 +3,7 @@ use bevy::window::PrimaryWindow;
 use rand::prelude::*;
 
 pub const BANANA_SPAWN_TIMER_IN_SECONDS: f32 = 3.0;
+pub const BANANA_SPEED: f32 = 800.0;
 
 fn main() {
     App::new()
@@ -18,6 +19,7 @@ fn main() {
         .add_startup_system(spawn_basket)
         .add_startup_system(spawn_camera)
         .add_startup_system(play_music)
+        .add_system(banana_movement)
         .add_system(tick_banana_spawn_timer)
         .add_system(spawn_bananas_over_time)
         .add_system(update_basket_position)
@@ -40,6 +42,17 @@ impl Default for BananaSpawnTimer {
         BananaSpawnTimer {
             timer: Timer::from_seconds(BANANA_SPAWN_TIMER_IN_SECONDS, TimerMode::Repeating),
         }
+    }
+}
+
+pub fn banana_movement(
+    mut banana_query: Query<(&mut Transform, &Banana)>,
+    time: Res<Time>,
+) {
+    for (mut transform, _banana) in banana_query.iter_mut() {
+        let direction = Vec3::new(0.0, -1.0, 0.0);
+
+        transform.translation += direction * BANANA_SPEED * time.delta_seconds();
     }
 }
 
