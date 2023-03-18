@@ -11,6 +11,8 @@ pub const BANANA_HEIGHT: f32 = 70.0;
 pub const BANANA_SPAWN_TIMER_IN_SECONDS: f32 = 0.5;
 pub const BANANA_SPEED: f32 = 800.0;
 
+pub const BACKGROUND_COLOR: Color = Color::rgb(0.6, 0.7568627451, 0.9450980392);
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
@@ -22,6 +24,7 @@ fn main() {
             }),
             ..default()
         }))
+        .insert_resource(ClearColor(BACKGROUND_COLOR))
         .init_resource::<BananaSpawnTimer>()
         .init_resource::<Score>()
         .add_startup_system(spawn_background)
@@ -134,11 +137,17 @@ pub fn spawn_background(
 
     commands.spawn(
         SpriteBundle {
-            transform: Transform::from_xyz(window.width() / 2.0, window.height() / 2.0, -1.0),
-            texture: asset_server.load("sprites/background.png"),
+            transform: Transform::from_xyz(window.width() / 6.0, window.height() / 1.25, -1.0),
+            texture: asset_server.load("sprites/hot_air_balloon.png"),
             ..default()
-        }
-    );
+        });
+
+    commands.spawn(
+        SpriteBundle {
+            transform: Transform::from_xyz(window.width() / 2.0, 119.0 / 2.0, -1.0),
+            texture: asset_server.load("sprites/ground.png"),
+            ..default()
+        });
 }
 
 pub fn spawn_basket(
