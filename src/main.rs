@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use rand::prelude::*;
 
-pub const BANANA_SPAWN_TIMER_IN_SECONDS: f32 = 3.0;
+pub const BANANA_SPAWN_TIMER_IN_SECONDS: f32 = 1.0;
 pub const BANANA_SPEED: f32 = 800.0;
 
 fn main() {
