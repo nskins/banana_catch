@@ -46,10 +46,7 @@ impl Default for BananaSpawnTimer {
     }
 }
 
-pub fn banana_movement(
-    mut banana_query: Query<(&mut Transform, &Banana)>,
-    time: Res<Time>,
-) {
+pub fn banana_movement(mut banana_query: Query<(&mut Transform, &Banana)>, time: Res<Time>) {
     for (mut transform, _banana) in banana_query.iter_mut() {
         let direction = Vec3::new(0.0, -1.0, 0.0);
 
@@ -60,7 +57,7 @@ pub fn banana_movement(
 pub fn banana_hit_ground(
     mut commands: Commands,
     mut banana_query: Query<(Entity, &Transform), With<Banana>>,
-) { 
+) {
     let ground_y = Vec3::new(0.0, 0.0, 0.0);
 
     for (entity, transform) in banana_query.iter_mut() {
@@ -76,13 +73,10 @@ pub fn banana_hit_ground(
     }
 }
 
-pub fn play_music(
-    asset_server: Res<AssetServer>,
-    audio: Res<Audio>
-) {
+pub fn play_music(asset_server: Res<AssetServer>, audio: Res<Audio>) {
     audio.play_with_settings(
         asset_server.load("audio/main_theme.ogg"),
-        PlaybackSettings::LOOP.with_volume(1.0)
+        PlaybackSettings::LOOP.with_volume(1.0),
     );
 }
 
@@ -103,10 +97,7 @@ pub fn spawn_basket(
     ));
 }
 
-pub fn spawn_camera(
-    mut commands: Commands,
-    window_query: Query<&Window, With<PrimaryWindow>>
-) {
+pub fn spawn_camera(mut commands: Commands, window_query: Query<&Window, With<PrimaryWindow>>) {
     let window = window_query.get_single().unwrap();
 
     commands.spawn(Camera2dBundle {
@@ -115,10 +106,7 @@ pub fn spawn_camera(
     });
 }
 
-pub fn tick_banana_spawn_timer(
-    mut banana_spawn_timer: ResMut<BananaSpawnTimer>,
-    time: Res<Time>
-) {
+pub fn tick_banana_spawn_timer(mut banana_spawn_timer: ResMut<BananaSpawnTimer>, time: Res<Time>) {
     banana_spawn_timer.timer.tick(time.delta());
 }
 
@@ -134,12 +122,12 @@ pub fn spawn_bananas_over_time(
         let random_x = random::<f32>() * window.width();
 
         commands.spawn((
-                SpriteBundle {
-                    transform: Transform::from_xyz(random_x, window.height(), 0.0),
-                    texture: asset_server.load("sprites/banana.png"),
-                    ..default()
-                },
-                Banana {}
+            SpriteBundle {
+                transform: Transform::from_xyz(random_x, window.height(), 0.0),
+                texture: asset_server.load("sprites/banana.png"),
+                ..default()
+            },
+            Banana {},
         ));
     }
 }
@@ -154,4 +142,3 @@ pub fn update_basket_position(
         }
     }
 }
-
