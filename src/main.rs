@@ -22,6 +22,7 @@ fn main() {
             ..default()
         }))
         .init_resource::<BananaSpawnTimer>()
+        .init_resource::<Score>()
         .add_startup_system(spawn_basket)
         .add_startup_system(spawn_camera)
         .add_startup_system(play_music)
@@ -31,6 +32,7 @@ fn main() {
         .add_system(tick_banana_spawn_timer)
         .add_system(spawn_bananas_over_time)
         .add_system(update_basket_position)
+        .add_system(update_score)
         .run();
 }
 
@@ -43,6 +45,17 @@ pub struct Basket {}
 #[derive(Resource)]
 pub struct BananaSpawnTimer {
     pub timer: Timer,
+}
+
+#[derive(Resource)]
+pub struct Score {
+    pub value: u32,
+}
+
+impl Default for Score {
+    fn default() -> Score {
+        Score { value: 0 }
+    }
 }
 
 impl Default for BananaSpawnTimer {
@@ -65,6 +78,7 @@ pub fn banana_hit_basket(
     mut commands: Commands,
     mut banana_query: Query<(Entity, &Transform), With<Banana>>,
     basket_query: Query<&Transform, With<Basket>>,
+    mut score: ResMut<Score>,
 ) {
     if let Ok(basket_transform) = basket_query.get_single() {
         for (banana_entity, banana_transform) in banana_query.iter_mut() {
@@ -76,6 +90,7 @@ pub fn banana_hit_basket(
             let banana_radius = BANANA_HEIGHT / 2.0;
 
             if distance < basket_radius + banana_radius {
+                score.value += 1;
                 commands.entity(banana_entity).despawn();
             }
         }
@@ -168,5 +183,11 @@ pub fn update_basket_position(
         for event in events.iter() {
             transform.translation.x = event.position.x;
         }
+    }
+}
+
+pub fn update_score(score: Res<Score>) {
+    if score.is_changed() {
+        println!("Score: {}", score.value.to_string());
     }
 }
