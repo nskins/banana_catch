@@ -13,12 +13,23 @@ fn main() {
         }))
         .add_startup_system(spawn_basket)
         .add_startup_system(spawn_camera)
+        .add_startup_system(play_music)
         .add_system(update_basket_position)
         .run();
 }
 
 #[derive(Component)]
 pub struct Basket {}
+
+pub fn play_music(
+    asset_server: Res<AssetServer>,
+    audio: Res<Audio>
+) {
+    audio.play_with_settings(
+        asset_server.load("audio/main_theme.ogg"),
+        PlaybackSettings::LOOP.with_volume(1.0)
+    );
+}
 
 pub fn spawn_basket(
     mut commands: Commands,
