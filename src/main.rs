@@ -11,7 +11,7 @@ pub const BANANA_HEIGHT: f32 = 70.0;
 pub const BANANA_SPAWN_TIMER_IN_SECONDS: f32 = 0.5;
 pub const BANANA_SPEED: f32 = 800.0;
 
-pub const SIDE_BOUND_SIZE: f32 = 120.0;
+pub const BOUND_SIZE: f32 = 120.0;
 
 pub const BACKGROUND_COLOR: Color = Color::rgb(0.6, 0.7568627451, 0.9450980392);
 
@@ -182,7 +182,7 @@ pub fn spawn_basket(
 
     commands.spawn((
         SpriteBundle {
-            transform: Transform::from_xyz(window.width() / 2.0, 120.0, 0.0),
+            transform: Transform::from_xyz(window.width() / 2.0, BOUND_SIZE, 0.0),
             texture: asset_server.load("sprites/basket.png"),
             ..default()
         },
@@ -212,9 +212,9 @@ pub fn spawn_bananas_over_time(
     if banana_spawn_timer.timer.finished() {
         let window = window_query.get_single().unwrap();
 
-        let bounds_width = window.width() - (2.0 * SIDE_BOUND_SIZE);
+        let bounds_width = window.width() - (2.0 * BOUND_SIZE);
 
-        let random_x = (random::<f32>() * bounds_width) + SIDE_BOUND_SIZE;
+        let random_x = (random::<f32>() * bounds_width) + BOUND_SIZE;
 
         commands.spawn((
             SpriteBundle {
@@ -236,11 +236,11 @@ pub fn update_basket_position(
 
     if let Ok(mut transform) = basket_query.get_single_mut() {
         for event in events.iter() {
-            if (event.position.x < SIDE_BOUND_SIZE) {
-                transform.translation.x = SIDE_BOUND_SIZE;
+            if (event.position.x < BOUND_SIZE) {
+                transform.translation.x = BOUND_SIZE;
             }
-            else if (event.position.x > window.width() - SIDE_BOUND_SIZE) {
-                transform.translation.x = window.width() - SIDE_BOUND_SIZE;
+            else if (event.position.x > window.width() - BOUND_SIZE) {
+                transform.translation.x = window.width() - BOUND_SIZE;
             }
             else {
                 transform.translation.x = event.position.x;
