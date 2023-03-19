@@ -32,6 +32,7 @@ fn main() {
         .add_startup_system(spawn_background)
         .add_startup_system(spawn_basket)
         .add_startup_system(spawn_camera)
+        .add_startup_system(spawn_score_text)
         .add_startup_system(play_music)
         .add_system(banana_movement)
         .add_system(banana_hit_basket)
@@ -48,6 +49,9 @@ pub struct Banana {}
 
 #[derive(Component)]
 pub struct Basket {}
+
+#[derive(Component)]
+pub struct ScoreText {}
 
 #[derive(Resource)]
 pub struct BananaSpawnTimer {
@@ -137,40 +141,35 @@ pub fn spawn_background(
 ) {
     let window = window_query.get_single().unwrap();
 
-    commands.spawn(
-        SpriteBundle {
-            transform: Transform::from_xyz(window.width() / 6.0, window.height() / 1.25, -1.0),
-            texture: asset_server.load("sprites/hot_air_balloon.png"),
-            ..default()
-        });
+    commands.spawn(SpriteBundle {
+        transform: Transform::from_xyz(window.width() / 6.0, window.height() / 1.25, -1.0),
+        texture: asset_server.load("sprites/hot_air_balloon.png"),
+        ..default()
+    });
 
-    commands.spawn(
-        SpriteBundle {
-            transform: Transform::from_xyz(window.width() / 1.5, window.height() / 4.5, -1.0),
-            texture: asset_server.load("sprites/tree.png"),
-            ..default()
-        });
+    commands.spawn(SpriteBundle {
+        transform: Transform::from_xyz(window.width() / 1.5, window.height() / 4.5, -1.0),
+        texture: asset_server.load("sprites/tree.png"),
+        ..default()
+    });
 
-    commands.spawn(
-        SpriteBundle {
-            transform: Transform::from_xyz(window.width() / 2.5, window.height() / 1.75, -1.0),
-            texture: asset_server.load("sprites/cloud_small.png"),
-            ..default()
-        });
+    commands.spawn(SpriteBundle {
+        transform: Transform::from_xyz(window.width() / 2.5, window.height() / 1.75, -1.0),
+        texture: asset_server.load("sprites/cloud_small.png"),
+        ..default()
+    });
 
-    commands.spawn(
-        SpriteBundle {
-            transform: Transform::from_xyz(window.width() / 1.1, window.height(), -1.0),
-            texture: asset_server.load("sprites/cloud_big.png"),
-            ..default()
-        });
+    commands.spawn(SpriteBundle {
+        transform: Transform::from_xyz(window.width() / 1.1, window.height(), -1.0),
+        texture: asset_server.load("sprites/cloud_big.png"),
+        ..default()
+    });
 
-    commands.spawn(
-        SpriteBundle {
-            transform: Transform::from_xyz(window.width() / 2.0, 119.0 / 2.0, -2.0),
-            texture: asset_server.load("sprites/ground.png"),
-            ..default()
-        });
+    commands.spawn(SpriteBundle {
+        transform: Transform::from_xyz(window.width() / 2.0, 119.0 / 2.0, -2.0),
+        texture: asset_server.load("sprites/ground.png"),
+        ..default()
+    });
 }
 
 pub fn spawn_basket(
@@ -197,6 +196,33 @@ pub fn spawn_camera(mut commands: Commands, window_query: Query<&Window, With<Pr
         transform: Transform::from_xyz(window.width() / 2.0, window.height() / 2.0, 0.0),
         ..default()
     });
+}
+
+pub fn spawn_score_text(mut commands: Commands, asset_server: Res<AssetServer>, score: Res<Score>) {
+    commands.spawn((
+        TextBundle {
+            text: Text::from_section(
+                format!("Score: {0}", score.value),
+                TextStyle {
+                    font: asset_server.load("fonts/FiraMono-Medium.ttf"),
+                    font_size: 60.0,
+                    color: Color::BLACK,
+                    ..default()
+                },
+            ),
+            ..default()
+        }
+        .with_style(Style {
+            position_type: PositionType::Absolute,
+            position: UiRect {
+                top: Val::Px(5.0),
+                left: Val::Px(15.0),
+                ..default()
+            },
+            ..default()
+        }),
+        ScoreText {},
+    ));
 }
 
 pub fn tick_banana_spawn_timer(mut banana_spawn_timer: ResMut<BananaSpawnTimer>, time: Res<Time>) {
@@ -238,19 +264,19 @@ pub fn update_basket_position(
         for event in events.iter() {
             if (event.position.x < BOUND_SIZE) {
                 transform.translation.x = BOUND_SIZE;
-            }
-            else if (event.position.x > window.width() - BOUND_SIZE) {
+            } else if (event.position.x > window.width() - BOUND_SIZE) {
                 transform.translation.x = window.width() - BOUND_SIZE;
-            }
-            else {
+            } else {
                 transform.translation.x = event.position.x;
             }
         }
     }
 }
 
-pub fn update_score(score: Res<Score>) {
+pub fn update_score(mut score_text_query: Query<&mut Text, With<ScoreText>>, score: Res<Score>) {
     if score.is_changed() {
-        println!("Score: {}", score.value.to_string());
+        if let Ok(mut text) = score_text_query.get_single_mut() {
+            text.sections[0].value = format!("Score: {0}", score.value);
+        }
     }
 }
