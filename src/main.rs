@@ -11,6 +11,8 @@ pub const BANANA_HEIGHT: f32 = 70.0;
 pub const BANANA_SPAWN_TIMER_IN_SECONDS: f32 = 0.5;
 pub const BANANA_SPEED: f32 = 800.0;
 
+pub const SIDE_BOUND_SIZE: f32 = 120.0;
+
 pub const BACKGROUND_COLOR: Color = Color::rgb(0.6, 0.7568627451, 0.9450980392);
 
 fn main() {
@@ -210,7 +212,9 @@ pub fn spawn_bananas_over_time(
     if banana_spawn_timer.timer.finished() {
         let window = window_query.get_single().unwrap();
 
-        let random_x = random::<f32>() * window.width();
+        let bounds_width = window.width() - (2.0 * SIDE_BOUND_SIZE);
+
+        let random_x = (random::<f32>() * bounds_width) + SIDE_BOUND_SIZE;
 
         commands.spawn((
             SpriteBundle {
@@ -225,11 +229,22 @@ pub fn spawn_bananas_over_time(
 
 pub fn update_basket_position(
     mut events: EventReader<CursorMoved>,
+    window_query: Query<&Window, With<PrimaryWindow>>,
     mut basket_query: Query<&mut Transform, With<Basket>>,
 ) {
+    let window = window_query.get_single().unwrap();
+
     if let Ok(mut transform) = basket_query.get_single_mut() {
         for event in events.iter() {
-            transform.translation.x = event.position.x;
+            if (event.position.x < SIDE_BOUND_SIZE) {
+                transform.translation.x = SIDE_BOUND_SIZE;
+            }
+            else if (event.position.x > window.width() - SIDE_BOUND_SIZE) {
+                transform.translation.x = window.width() - SIDE_BOUND_SIZE;
+            }
+            else {
+                transform.translation.x = event.position.x;
+            }
         }
     }
 }
