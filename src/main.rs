@@ -120,8 +120,6 @@ pub fn banana_hit_ground(
         let distance = ground_y.distance(entity_y);
 
         if distance < 5.0 {
-            println!("Despawning banana!");
-
             commands.entity(entity).despawn();
         }
     }
