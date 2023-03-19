@@ -144,7 +144,28 @@ pub fn spawn_background(
 
     commands.spawn(
         SpriteBundle {
-            transform: Transform::from_xyz(window.width() / 2.0, 119.0 / 2.0, -1.0),
+            transform: Transform::from_xyz(window.width() / 1.5, window.height() / 4.5, -1.0),
+            texture: asset_server.load("sprites/tree.png"),
+            ..default()
+        });
+
+    commands.spawn(
+        SpriteBundle {
+            transform: Transform::from_xyz(window.width() / 2.5, window.height() / 1.75, -1.0),
+            texture: asset_server.load("sprites/cloud_small.png"),
+            ..default()
+        });
+
+    commands.spawn(
+        SpriteBundle {
+            transform: Transform::from_xyz(window.width() / 1.1, window.height(), -1.0),
+            texture: asset_server.load("sprites/cloud_big.png"),
+            ..default()
+        });
+
+    commands.spawn(
+        SpriteBundle {
+            transform: Transform::from_xyz(window.width() / 2.0, 119.0 / 2.0, -2.0),
             texture: asset_server.load("sprites/ground.png"),
             ..default()
         });
