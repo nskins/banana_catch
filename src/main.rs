@@ -5,7 +5,7 @@ use rand::prelude::*;
 pub const BASKET_WIDTH: f32 = 128.0;
 pub const BANANA_HEIGHT: f32 = 70.0;
 // When you set the `BANANA_SPAWN_TIMER_IN_SECONDS` to 1.0, a bug
-// occurs when you catch a banana at the top of the bucket. The
+// occurs when you catch a banana at the top of the basket. The
 // other banana that has "just spawned" will disappear until the
 // next banana spawns. Should look into this more.
 pub const BANANA_SPAWN_TIMER_IN_SECONDS: f32 = 0.5;
@@ -181,7 +181,7 @@ pub fn spawn_basket(
     commands.spawn((
         SpriteBundle {
             transform: Transform::from_xyz(window.width() / 2.0, 120.0, 0.0),
-            texture: asset_server.load("sprites/bucket.png"),
+            texture: asset_server.load("sprites/basket.png"),
             ..default()
         },
         Basket {},
