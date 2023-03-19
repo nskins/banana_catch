@@ -260,9 +260,9 @@ pub fn update_basket_position(
 
     if let Ok(mut transform) = basket_query.get_single_mut() {
         for event in events.iter() {
-            if (event.position.x < BOUND_SIZE) {
+            if event.position.x < BOUND_SIZE {
                 transform.translation.x = BOUND_SIZE;
-            } else if (event.position.x > window.width() - BOUND_SIZE) {
+            } else if event.position.x > window.width() - BOUND_SIZE {
                 transform.translation.x = window.width() - BOUND_SIZE;
             } else {
                 transform.translation.x = event.position.x;
