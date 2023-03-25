@@ -103,13 +103,13 @@ pub fn banana_movement(
 
 pub fn banana_hit_basket(
     mut commands: Commands,
-    mut banana_query: Query<(Entity, &Transform), With<Banana>>,
-    mut banana_bunch_query: Query<(Entity, &Transform), With<BananaBunch>>,
+    mut banana_query: Query<(Entity, &Transform, &BananaPoints), With<Banana>>,
+    mut banana_bunch_query: Query<(Entity, &Transform, &BananaPoints), With<BananaBunch>>,
     basket_query: Query<&Transform, With<Basket>>,
     mut score: ResMut<Score>,
 ) {
     if let Ok(basket_transform) = basket_query.get_single() {
-        for (banana_entity, banana_transform) in banana_query.iter_mut() {
+        for (banana_entity, banana_transform, points) in banana_query.iter_mut() {
             let distance = banana_transform
                 .translation
                 .distance(basket_transform.translation);
@@ -118,11 +118,11 @@ pub fn banana_hit_basket(
             let banana_radius = BANANA_HEIGHT / 2.0;
 
             if distance < basket_radius + banana_radius {
-                score.value += 1;
+                score.value += points.value;
                 commands.entity(banana_entity).despawn();
             }
         }
-        for (banana_bunch_entity, banana_bunch_transform) in banana_bunch_query.iter_mut() {
+        for (banana_bunch_entity, banana_bunch_transform, points) in banana_bunch_query.iter_mut() {
             let distance = banana_bunch_transform
                 .translation
                 .distance(basket_transform.translation);
@@ -131,7 +131,7 @@ pub fn banana_hit_basket(
             let banana_bunch_radius = BANANA_HEIGHT / 2.0;
 
             if distance < basket_radius + banana_bunch_radius {
-                score.value += 5;
+                score.value += points.value;
                 commands.entity(banana_bunch_entity).despawn();
             }
         }
