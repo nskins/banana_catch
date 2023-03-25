@@ -1,3 +1,5 @@
+use bevy::app::AppExit;
+use bevy::input::keyboard::KeyboardInput;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use rand::prelude::*;
@@ -41,6 +43,7 @@ fn main() {
         .add_system(spawn_bananas_over_time)
         .add_system(update_basket_position)
         .add_system(update_score)
+        .add_system(close_on_escape)
         .run();
 }
 
@@ -275,6 +278,17 @@ pub fn update_score(mut score_text_query: Query<&mut Text, With<ScoreText>>, sco
     if score.is_changed() {
         if let Ok(mut text) = score_text_query.get_single_mut() {
             text.sections[0].value = format!("Score: {0}", score.value);
+        }
+    }
+}
+
+fn close_on_escape(
+    mut keyboard_input_events: EventReader<KeyboardInput>,
+    mut app_exit_events: EventWriter<AppExit>,
+) {
+    for event in keyboard_input_events.iter() {
+        if event.key_code == Some(KeyCode::Escape) && event.state.is_pressed() {
+            app_exit_events.send(AppExit);
         }
     }
 }
