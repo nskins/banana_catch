@@ -1,5 +1,3 @@
-use bevy::app::AppExit;
-use bevy::input::keyboard::KeyboardInput;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use rand::prelude::*;
@@ -43,7 +41,6 @@ fn main() {
         .add_system(spawn_bananas_over_time)
         .add_system(update_basket_position)
         .add_system(update_score)
-        .add_system(close_on_escape)
         .run();
 }
 
@@ -51,7 +48,15 @@ fn main() {
 pub struct Banana {}
 
 #[derive(Component)]
+pub struct BananaBunch {}
+
+#[derive(Component)]
 pub struct Basket {}
+
+#[derive(Component)]
+pub struct BananaPoints {
+    pub value: u32,
+}
 
 #[derive(Component)]
 pub struct ScoreText {}
@@ -80,10 +85,18 @@ impl Default for BananaSpawnTimer {
     }
 }
 
-pub fn banana_movement(mut banana_query: Query<(&mut Transform, &Banana)>, time: Res<Time>) {
-    for (mut transform, _banana) in banana_query.iter_mut() {
-        let direction = Vec3::new(0.0, -1.0, 0.0);
+pub fn banana_movement(
+    mut query: Query<(
+        &mut Transform,
+        Option<&Banana>,
+        Option<&BananaBunch>,
+        &BananaPoints,
+    )>,
+    time: Res<Time>,
+) {
+    let direction = Vec3::new(0.0, -1.0, 0.0);
 
+    for (mut transform, _banana, _banana_bunch, _points) in query.iter_mut() {
         transform.translation += direction * BANANA_SPEED * time.delta_seconds();
     }
 }
@@ -91,6 +104,7 @@ pub fn banana_movement(mut banana_query: Query<(&mut Transform, &Banana)>, time:
 pub fn banana_hit_basket(
     mut commands: Commands,
     mut banana_query: Query<(Entity, &Transform), With<Banana>>,
+    mut banana_bunch_query: Query<(Entity, &Transform), With<BananaBunch>>,
     basket_query: Query<&Transform, With<Basket>>,
     mut score: ResMut<Score>,
 ) {
@@ -106,6 +120,19 @@ pub fn banana_hit_basket(
             if distance < basket_radius + banana_radius {
                 score.value += 1;
                 commands.entity(banana_entity).despawn();
+            }
+        }
+        for (banana_bunch_entity, banana_bunch_transform) in banana_bunch_query.iter_mut() {
+            let distance = banana_bunch_transform
+                .translation
+                .distance(basket_transform.translation);
+
+            let basket_radius = BASKET_WIDTH / 2.0;
+            let banana_bunch_radius = BANANA_HEIGHT / 2.0;
+
+            if distance < basket_radius + banana_bunch_radius {
+                score.value += 5;
+                commands.entity(banana_bunch_entity).despawn();
             }
         }
     }
@@ -243,14 +270,31 @@ pub fn spawn_bananas_over_time(
 
         let random_x = (random::<f32>() * bounds_width) + BOUND_SIZE;
 
-        commands.spawn((
-            SpriteBundle {
-                transform: Transform::from_xyz(random_x, window.height(), 0.0),
-                texture: asset_server.load("sprites/banana.png"),
-                ..default()
-            },
-            Banana {},
-        ));
+        let is_bunch = random::<f32>() < 0.1;
+
+        if is_bunch {
+            commands
+                .spawn((
+                    SpriteBundle {
+                        transform: Transform::from_xyz(random_x, window.height(), 0.0),
+                        texture: asset_server.load("sprites/bananabunch.png"),
+                        ..default()
+                    },
+                    BananaBunch {},
+                ))
+                .insert(BananaPoints { value: 5 });
+        } else {
+            commands
+                .spawn((
+                    SpriteBundle {
+                        transform: Transform::from_xyz(random_x, window.height(), 0.0),
+                        texture: asset_server.load("sprites/banana.png"),
+                        ..default()
+                    },
+                    Banana {},
+                ))
+                .insert(BananaPoints { value: 1 });
+        }
     }
 }
 
@@ -278,17 +322,6 @@ pub fn update_score(mut score_text_query: Query<&mut Text, With<ScoreText>>, sco
     if score.is_changed() {
         if let Ok(mut text) = score_text_query.get_single_mut() {
             text.sections[0].value = format!("Score: {0}", score.value);
-        }
-    }
-}
-
-fn close_on_escape(
-    mut keyboard_input_events: EventReader<KeyboardInput>,
-    mut app_exit_events: EventWriter<AppExit>,
-) {
-    for event in keyboard_input_events.iter() {
-        if event.key_code == Some(KeyCode::Escape) && event.state.is_pressed() {
-            app_exit_events.send(AppExit);
         }
     }
 }
