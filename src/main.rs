@@ -29,18 +29,18 @@ fn main() {
             ..default()
         }))
         .insert_resource(ClearColor(BACKGROUND_COLOR))
-        .init_resource::<BananaSpawnTimer>()
+        .init_resource::<FallingObjectSpawnTimer>()
         .init_resource::<Score>()
         .add_startup_system(spawn_background)
         .add_startup_system(spawn_basket)
         .add_startup_system(spawn_camera)
         .add_startup_system(spawn_score_text)
         .add_startup_system(play_music)
-        .add_system(banana_movement)
-        .add_system(banana_hit_basket)
-        .add_system(banana_hit_ground)
-        .add_system(tick_banana_spawn_timer)
-        .add_system(spawn_bananas_over_time)
+        .add_system(falling_object_movement)
+        .add_system(falling_object_hit_basket)
+        .add_system(falling_object_hit_ground)
+        .add_system(tick_falling_object_spawn_timer)
+        .add_system(spawn_falling_objects_over_time)
         .add_system(update_basket_position)
         .add_system(update_score)
         .add_system(close_on_escape)
@@ -48,24 +48,25 @@ fn main() {
 }
 
 #[derive(Component)]
-pub struct Banana {}
+pub struct FallingObject {
+    kind: FallingObjectKind,
+    points: u32,
+}
 
-#[derive(Component)]
-pub struct BananaBunch {}
+#[derive(Clone, Copy)]
+pub enum FallingObjectKind {
+    Banana,
+    BananaBunch,
+}
 
 #[derive(Component)]
 pub struct Basket {}
 
 #[derive(Component)]
-pub struct BananaPoints {
-    pub value: u32,
-}
-
-#[derive(Component)]
 pub struct ScoreText {}
 
 #[derive(Resource)]
-pub struct BananaSpawnTimer {
+pub struct FallingObjectSpawnTimer {
     pub timer: Timer,
 }
 
@@ -80,74 +81,90 @@ impl Default for Score {
     }
 }
 
-impl Default for BananaSpawnTimer {
-    fn default() -> BananaSpawnTimer {
-        BananaSpawnTimer {
+impl Default for FallingObjectSpawnTimer {
+    fn default() -> FallingObjectSpawnTimer {
+        FallingObjectSpawnTimer {
             timer: Timer::from_seconds(BANANA_SPAWN_TIMER_IN_SECONDS, TimerMode::Repeating),
         }
     }
 }
 
-pub fn banana_movement(
-    mut query: Query<(
-        &mut Transform,
-        Option<&Banana>,
-        Option<&BananaBunch>,
-        &BananaPoints,
-    )>,
+pub fn falling_object_movement(
+    mut object_query: Query<(&mut Transform, &FallingObject)>,
     time: Res<Time>,
 ) {
-    let direction = Vec3::new(0.0, -1.0, 0.0);
-
-    for (mut transform, _banana, _banana_bunch, _points) in query.iter_mut() {
+    for (mut transform, _object) in object_query.iter_mut() {
+        let direction = Vec3::new(0.0, -1.0, 0.0);
         transform.translation += direction * BANANA_SPEED * time.delta_seconds();
     }
 }
 
-pub fn banana_hit_basket(
+pub fn falling_object_hit_basket(
     mut commands: Commands,
-    mut banana_query: Query<(Entity, &Transform, &BananaPoints), With<Banana>>,
-    mut banana_bunch_query: Query<(Entity, &Transform, &BananaPoints), With<BananaBunch>>,
+    mut object_query: Query<(Entity, &Transform, &FallingObject)>,
     basket_query: Query<&Transform, With<Basket>>,
     mut score: ResMut<Score>,
 ) {
     if let Ok(basket_transform) = basket_query.get_single() {
-        for (banana_entity, banana_transform, points) in banana_query.iter_mut() {
-            let distance = banana_transform
+        for (object_entity, object_transform, falling_object) in object_query.iter_mut() {
+            let distance = object_transform
                 .translation
                 .distance(basket_transform.translation);
 
             let basket_radius = BASKET_WIDTH / 2.0;
-            let banana_radius = BANANA_HEIGHT / 2.0;
+            let object_radius = match falling_object.kind {
+                FallingObjectKind::Banana => BANANA_HEIGHT / 2.0,
+                FallingObjectKind::BananaBunch => BANANA_HEIGHT / 2.0,
+            };
 
-            if distance < basket_radius + banana_radius {
-                score.value += points.value;
-                commands.entity(banana_entity).despawn();
-            }
-        }
-        for (banana_bunch_entity, banana_bunch_transform, points) in banana_bunch_query.iter_mut() {
-            let distance = banana_bunch_transform
-                .translation
-                .distance(basket_transform.translation);
-
-            let basket_radius = BASKET_WIDTH / 2.0;
-            let banana_bunch_radius = BANANA_HEIGHT / 2.0;
-
-            if distance < basket_radius + banana_bunch_radius {
-                score.value += points.value;
-                commands.entity(banana_bunch_entity).despawn();
+            if distance < basket_radius + object_radius {
+                score.value += falling_object.points;
+                commands.entity(object_entity).despawn();
             }
         }
     }
 }
 
-pub fn banana_hit_ground(
+pub fn spawn_falling_objects_over_time(
     mut commands: Commands,
-    mut banana_query: Query<(Entity, &Transform), With<Banana>>,
+    window_query: Query<&Window, With<PrimaryWindow>>,
+    asset_server: Res<AssetServer>,
+    falling_object_spawn_timer: Res<FallingObjectSpawnTimer>,
+) {
+    if falling_object_spawn_timer.timer.finished() {
+        let window = window_query.get_single().unwrap();
+
+        let bounds_width = window.width() - (2.0 * BOUND_SIZE);
+
+        let random_x = (random::<f32>() * bounds_width) + BOUND_SIZE;
+
+        let (object_kind, points, texture_path) = if random::<f32>() < 0.1 {
+            (FallingObjectKind::BananaBunch, 5, "sprites/bananabunch.png")
+        } else {
+            (FallingObjectKind::Banana, 1, "sprites/banana.png")
+        };
+
+        commands.spawn((
+            SpriteBundle {
+                transform: Transform::from_xyz(random_x, window.height(), 0.0),
+                texture: asset_server.load(texture_path),
+                ..default()
+            },
+            FallingObject {
+                kind: object_kind,
+                points,
+            },
+        ));
+    }
+}
+
+pub fn falling_object_hit_ground(
+    mut commands: Commands,
+    mut falling_object_query: Query<(Entity, &Transform), With<FallingObject>>,
 ) {
     let ground_y = Vec3::new(0.0, 0.0, 0.0);
 
-    for (entity, transform) in banana_query.iter_mut() {
+    for (entity, transform) in falling_object_query.iter_mut() {
         let entity_y = Vec3::new(0.0, transform.translation.y, 0.0);
 
         let distance = ground_y.distance(entity_y);
@@ -256,49 +273,11 @@ pub fn spawn_score_text(mut commands: Commands, asset_server: Res<AssetServer>, 
     ));
 }
 
-pub fn tick_banana_spawn_timer(mut banana_spawn_timer: ResMut<BananaSpawnTimer>, time: Res<Time>) {
-    banana_spawn_timer.timer.tick(time.delta());
-}
-
-pub fn spawn_bananas_over_time(
-    mut commands: Commands,
-    window_query: Query<&Window, With<PrimaryWindow>>,
-    asset_server: Res<AssetServer>,
-    banana_spawn_timer: Res<BananaSpawnTimer>,
+pub fn tick_falling_object_spawn_timer(
+    mut falling_object_spawn_timer: ResMut<FallingObjectSpawnTimer>,
+    time: Res<Time>,
 ) {
-    if banana_spawn_timer.timer.finished() {
-        let window = window_query.get_single().unwrap();
-
-        let bounds_width = window.width() - (2.0 * BOUND_SIZE);
-
-        let random_x = (random::<f32>() * bounds_width) + BOUND_SIZE;
-
-        let is_bunch = random::<f32>() < 0.1;
-
-        if is_bunch {
-            commands
-                .spawn((
-                    SpriteBundle {
-                        transform: Transform::from_xyz(random_x, window.height(), 0.0),
-                        texture: asset_server.load("sprites/bananabunch.png"),
-                        ..default()
-                    },
-                    BananaBunch {},
-                ))
-                .insert(BananaPoints { value: 5 });
-        } else {
-            commands
-                .spawn((
-                    SpriteBundle {
-                        transform: Transform::from_xyz(random_x, window.height(), 0.0),
-                        texture: asset_server.load("sprites/banana.png"),
-                        ..default()
-                    },
-                    Banana {},
-                ))
-                .insert(BananaPoints { value: 1 });
-        }
-    }
+    falling_object_spawn_timer.timer.tick(time.delta());
 }
 
 pub fn update_basket_position(
