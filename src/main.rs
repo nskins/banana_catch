@@ -6,11 +6,11 @@ use rand::prelude::*;
 
 pub const BASKET_WIDTH: f32 = 128.0;
 pub const BANANA_HEIGHT: f32 = 70.0;
-// When you set the `BANANA_SPAWN_TIMER_IN_SECONDS` to 1.0, a bug
+// When you set the `BANANA_SPAWN_TIMER_IN_SECONDS` to 0.5, a bug
 // occurs when you catch a banana at the top of the basket. The
 // other banana that has "just spawned" will disappear until the
 // next banana spawns. Should look into this more.
-pub const BANANA_SPAWN_TIMER_IN_SECONDS: f32 = 0.5;
+pub const BANANA_SPAWN_TIMER_IN_SECONDS: f32 = 0.55;
 pub const BANANA_SPEED: f32 = 800.0;
 
 pub const BOUND_SIZE: f32 = 120.0;
@@ -90,10 +90,10 @@ impl Default for FallingObjectSpawnTimer {
 }
 
 pub fn falling_object_movement(
-    mut object_query: Query<(&mut Transform, &FallingObject)>,
+    mut object_query: Query<&mut Transform, With<FallingObject>>,
     time: Res<Time>,
 ) {
-    for (mut transform, _object) in object_query.iter_mut() {
+    for mut transform in object_query.iter_mut() {
         let direction = Vec3::new(0.0, -1.0, 0.0);
         transform.translation += direction * BANANA_SPEED * time.delta_seconds();
     }
