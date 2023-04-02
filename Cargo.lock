@@ -260,7 +260,7 @@ dependencies = [
 
 [[package]]
 name = "banana_catch"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "bevy",
  "rand",
