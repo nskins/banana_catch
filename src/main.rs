@@ -10,7 +10,7 @@ pub const BANANA_HEIGHT: f32 = 70.0;
 // occurs when you catch a banana at the top of the basket. The
 // other banana that has "just spawned" will disappear until the
 // next banana spawns. Should look into this more.
-pub const BANANA_SPAWN_TIMER_IN_SECONDS: f32 = 0.55;
+pub const BANANA_SPAWN_TIMER_IN_SECONDS: f32 = 0.5;
 pub const BANANA_SPEED: f32 = 800.0;
 
 pub const BOUND_SIZE: f32 = 120.0;
