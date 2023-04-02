@@ -6,11 +6,7 @@ use rand::prelude::*;
 
 pub const BASKET_WIDTH: f32 = 128.0;
 pub const BANANA_HEIGHT: f32 = 70.0;
-// When you set the `BANANA_SPAWN_TIMER_IN_SECONDS` to 0.5, a bug
-// occurs when you catch a banana at the top of the basket. The
-// other banana that has "just spawned" will disappear until the
-// next banana spawns. Should look into this more.
-pub const BANANA_SPAWN_TIMER_IN_SECONDS: f32 = 0.55;
+pub const BANANA_SPAWN_TIMER_IN_SECONDS: f32 = 0.5;
 pub const BANANA_SPEED: f32 = 800.0;
 
 pub const BOUND_SIZE: f32 = 120.0;
@@ -36,6 +32,7 @@ fn main() {
         .add_startup_system(spawn_camera)
         .add_startup_system(spawn_score_text)
         .add_startup_system(play_music)
+        .add_startup_system(load_and_cache_images)
         .add_system(falling_object_movement)
         .add_system(falling_object_hit_basket)
         .add_system(falling_object_hit_ground)
@@ -71,6 +68,12 @@ pub struct FallingObjectSpawnTimer {
 }
 
 #[derive(Resource)]
+pub struct ImageCache {
+    banana: Handle<Image>,
+    bunch_of_bananas: Handle<Image>,
+}
+
+#[derive(Resource)]
 pub struct Score {
     pub value: u32,
 }
@@ -87,6 +90,13 @@ impl Default for FallingObjectSpawnTimer {
             timer: Timer::from_seconds(BANANA_SPAWN_TIMER_IN_SECONDS, TimerMode::Repeating),
         }
     }
+}
+
+pub fn load_and_cache_images(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands.insert_resource(ImageCache {
+        banana: asset_server.load("sprites/banana.png"),
+        bunch_of_bananas: asset_server.load("sprites/bananabunch.png"),
+    });
 }
 
 pub fn falling_object_movement(
@@ -128,8 +138,8 @@ pub fn falling_object_hit_basket(
 pub fn spawn_falling_objects_over_time(
     mut commands: Commands,
     window_query: Query<&Window, With<PrimaryWindow>>,
-    asset_server: Res<AssetServer>,
     falling_object_spawn_timer: Res<FallingObjectSpawnTimer>,
+    image_cache: Res<ImageCache>,
 ) {
     if falling_object_spawn_timer.timer.finished() {
         let window = window_query.get_single().unwrap();
@@ -138,16 +148,24 @@ pub fn spawn_falling_objects_over_time(
 
         let random_x = (random::<f32>() * bounds_width) + BOUND_SIZE;
 
-        let (object_kind, points, texture_path) = if random::<f32>() < 0.1 {
-            (FallingObjectKind::BananaBunch, 5, "sprites/bananabunch.png")
+        let (object_kind, points, texture) = if random::<f32>() < 0.1 {
+            (
+                FallingObjectKind::BananaBunch,
+                5,
+                image_cache.bunch_of_bananas.clone_weak(),
+            )
         } else {
-            (FallingObjectKind::Banana, 1, "sprites/banana.png")
+            (
+                FallingObjectKind::Banana,
+                1,
+                image_cache.banana.clone_weak(),
+            )
         };
 
         commands.spawn((
             SpriteBundle {
                 transform: Transform::from_xyz(random_x, window.height(), 0.0),
-                texture: asset_server.load(texture_path),
+                texture,
                 ..default()
             },
             FallingObject {
