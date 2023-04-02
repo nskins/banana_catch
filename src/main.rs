@@ -6,10 +6,6 @@ use rand::prelude::*;
 
 pub const BASKET_WIDTH: f32 = 128.0;
 pub const BANANA_HEIGHT: f32 = 70.0;
-// When you set the `BANANA_SPAWN_TIMER_IN_SECONDS` to 0.5, a bug
-// occurs when you catch a banana at the top of the basket. The
-// other banana that has "just spawned" will disappear until the
-// next banana spawns. Should look into this more.
 pub const BANANA_SPAWN_TIMER_IN_SECONDS: f32 = 0.5;
 pub const BANANA_SPEED: f32 = 800.0;
 
