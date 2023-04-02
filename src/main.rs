@@ -70,7 +70,7 @@ pub struct FallingObjectSpawnTimer {
 #[derive(Resource)]
 pub struct ImageCache {
     banana: Handle<Image>,
-    bunch_of_bananas: Handle<Image>
+    bunch_of_bananas: Handle<Image>,
 }
 
 #[derive(Resource)]
@@ -92,13 +92,10 @@ impl Default for FallingObjectSpawnTimer {
     }
 }
 
-pub fn load_and_cache_images(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-) {
+pub fn load_and_cache_images(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.insert_resource(ImageCache {
         banana: asset_server.load("sprites/banana.png"),
-        bunch_of_bananas: asset_server.load("sprites/bananabunch.png")
+        bunch_of_bananas: asset_server.load("sprites/bananabunch.png"),
     });
 }
 
@@ -152,9 +149,17 @@ pub fn spawn_falling_objects_over_time(
         let random_x = (random::<f32>() * bounds_width) + BOUND_SIZE;
 
         let (object_kind, points, texture) = if random::<f32>() < 0.1 {
-            (FallingObjectKind::BananaBunch, 5, image_cache.bunch_of_bananas.clone_weak())
+            (
+                FallingObjectKind::BananaBunch,
+                5,
+                image_cache.bunch_of_bananas.clone_weak(),
+            )
         } else {
-            (FallingObjectKind::Banana, 1, image_cache.banana.clone_weak())
+            (
+                FallingObjectKind::Banana,
+                1,
+                image_cache.banana.clone_weak(),
+            )
         };
 
         commands.spawn((
