@@ -1,4 +1,4 @@
-# Banana Catch
+# Banana Catch ![CI](https://github.com/nskins/banana_catch/actions/workflows/ci.yml/badge.svg)
 
 The year is 203X. An advanced rogue artificial intelligence has stockpiled humanity's entire supply of bananas in a space station high above Earth. Global military powers have united as one to execute humanity's last hope: Operation K. Utilizing the latest research in software/hardware security, scholars have discovered a way to perform a remote code execution attack on the space station's control interface; however, there is only one practical option available - to open the escape hatch and release the bananas into the atmosphere!
 
