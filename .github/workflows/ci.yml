@@ -8,6 +8,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-D warnings"
 
 jobs:
   build:
@@ -16,6 +17,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - name: Check formatting
+      run: cargo fmt --check
     - name: Install alsa and udev
       run: |
         sudo apt-get update; 
