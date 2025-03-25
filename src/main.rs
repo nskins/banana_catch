@@ -269,13 +269,15 @@ pub fn spawn_camera(mut commands: Commands, window_query: Query<&Window, With<Pr
 }
 
 pub fn spawn_score_text(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let font = TextFont {
+        font: asset_server.load("fonts/FiraMono-Medium.ttf"),
+        font_size: 60.0,
+        ..default()
+    };
+
     commands.spawn((
         Text::new("Score: "),
-        TextFont {
-            font: asset_server.load("fonts/FiraMono-Medium.ttf"),
-            font_size: 60.0,
-            ..default()
-        },
+        font.clone(),
         Node {
             position_type: PositionType::Absolute,
             top: Val::Px(5.0),
@@ -286,11 +288,7 @@ pub fn spawn_score_text(mut commands: Commands, asset_server: Res<AssetServer>) 
     ))
     .with_child((
         TextSpan::default(),
-        TextFont {
-            font: asset_server.load("fonts/FiraMono-Medium.ttf"),
-            font_size: 60.0,
-            ..default()
-        },
+        font.clone(),
         TextColor::BLACK,
         ScoreText
     ));
