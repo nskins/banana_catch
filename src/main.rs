@@ -12,7 +12,7 @@ pub const BANANA_SPEED: f32 = 800.0;
 
 pub const BOUND_SIZE: f32 = 120.0;
 
-pub const BACKGROUND_COLOR: Color = Color::rgb(0.6, 0.7568627451, 0.9450980392);
+pub const BACKGROUND_COLOR: Color = Color::srgb(0.6, 0.7568627451, 0.9450980392);
 
 fn main() {
     App::new()
@@ -349,7 +349,7 @@ fn close_on_escape(
 ) {
     for event in keyboard_input_events.read() {
         if event.key_code == KeyCode::Escape && event.state.is_pressed() {
-            app_exit_events.send(AppExit);
+            app_exit_events.send(AppExit::Success);
         }
     }
 }
