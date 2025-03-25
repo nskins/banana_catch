@@ -214,7 +214,7 @@ pub fn play_music(
     commands.spawn((
         AudioBundle {
             source: asset_server.load("audio/main_theme.ogg"),
-            settings: PlaybackSettings::LOOP.with_volume(Volume::new_relative(1.0))
+            settings: PlaybackSettings::LOOP.with_volume(Volume::new(1.0))
         },
         MainTheme
     ));
@@ -348,7 +348,7 @@ fn close_on_escape(
     mut app_exit_events: EventWriter<AppExit>,
 ) {
     for event in keyboard_input_events.read() {
-        if event.key_code == Some(KeyCode::Escape) && event.state.is_pressed() {
+        if event.key_code == KeyCode::Escape && event.state.is_pressed() {
             app_exit_events.send(AppExit);
         }
     }
