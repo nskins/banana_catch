@@ -1,4 +1,5 @@
 use bevy::app::AppExit;
+use bevy::audio::Volume;
 use bevy::input::keyboard::KeyboardInput;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
@@ -27,20 +28,30 @@ fn main() {
         .insert_resource(ClearColor(BACKGROUND_COLOR))
         .init_resource::<FallingObjectSpawnTimer>()
         .init_resource::<Score>()
-        .add_startup_system(spawn_background)
-        .add_startup_system(spawn_basket)
-        .add_startup_system(spawn_camera)
-        .add_startup_system(spawn_score_text)
-        .add_startup_system(play_music)
-        .add_startup_system(load_and_cache_images)
-        .add_system(falling_object_movement)
-        .add_system(falling_object_hit_basket)
-        .add_system(falling_object_hit_ground)
-        .add_system(tick_falling_object_spawn_timer)
-        .add_system(spawn_falling_objects_over_time)
-        .add_system(update_basket_position)
-        .add_system(update_score)
-        .add_system(close_on_escape)
+        .add_systems(
+            Startup,
+            (
+                spawn_background,
+                spawn_basket,
+                spawn_camera,
+                spawn_score_text,
+                play_music,
+                load_and_cache_images
+            )
+        )
+        .add_systems(
+            Update,
+            (
+                falling_object_movement,
+                falling_object_hit_basket,
+                falling_object_hit_ground,
+                tick_falling_object_spawn_timer,
+                spawn_falling_objects_over_time,
+                update_basket_position,
+                update_score,
+                close_on_escape
+            )
+        )
         .run();
 }
 
@@ -193,11 +204,20 @@ pub fn falling_object_hit_ground(
     }
 }
 
-pub fn play_music(asset_server: Res<AssetServer>, audio: Res<Audio>) {
-    audio.play_with_settings(
-        asset_server.load("audio/main_theme.ogg"),
-        PlaybackSettings::LOOP.with_volume(1.0),
-    );
+#[derive(Component)]
+struct MainTheme;
+
+pub fn play_music(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>
+) {
+    commands.spawn((
+        AudioBundle {
+            source: asset_server.load("audio/main_theme.ogg"),
+            settings: PlaybackSettings::LOOP.with_volume(Volume::new_relative(1.0))
+        },
+        MainTheme
+    ));
 }
 
 pub fn spawn_background(
@@ -280,11 +300,8 @@ pub fn spawn_score_text(mut commands: Commands, asset_server: Res<AssetServer>, 
         }
         .with_style(Style {
             position_type: PositionType::Absolute,
-            position: UiRect {
-                top: Val::Px(5.0),
-                left: Val::Px(15.0),
-                ..default()
-            },
+            top: Val::Px(5.0),
+            left: Val::Px(15.0),
             ..default()
         }),
         ScoreText {},
