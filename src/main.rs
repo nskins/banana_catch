@@ -277,8 +277,13 @@ pub fn spawn_score_text(mut commands: Commands, asset_server: Res<AssetServer>) 
             font_size: 60.0,
             ..default()
         },
-        TextColor::BLACK,
-        Anchor::TopLeft
+        Node {
+            position_type: PositionType::Absolute,
+            top: Val::Px(5.0),
+            left: Val::Px(15.0),
+            ..default()
+        },
+        TextColor::BLACK
     ))
     .with_child((
         TextSpan::default(),
