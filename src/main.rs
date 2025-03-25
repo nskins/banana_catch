@@ -3,7 +3,7 @@ use bevy::audio::Volume;
 use bevy::input::keyboard::KeyboardInput;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
-use rand::prelude::*;
+use rand::random;
 
 pub const BASKET_WIDTH: f32 = 128.0;
 pub const BANANA_HEIGHT: f32 = 70.0;
