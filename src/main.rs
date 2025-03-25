@@ -2,7 +2,6 @@ use bevy::app::AppExit;
 use bevy::audio::Volume;
 use bevy::input::keyboard::KeyboardInput;
 use bevy::prelude::*;
-use bevy::sprite::Anchor;
 use bevy::window::PrimaryWindow;
 use rand::prelude::*;
 
