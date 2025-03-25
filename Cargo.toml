@@ -11,4 +11,4 @@ rust-version = "1.85.0"
 
 [dependencies]
 bevy="0.15.3"
-rand="0.8.5"
+rand="0.9.0"
