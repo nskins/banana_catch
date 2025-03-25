@@ -2,6 +2,7 @@ use bevy::app::AppExit;
 use bevy::audio::Volume;
 use bevy::input::keyboard::KeyboardInput;
 use bevy::prelude::*;
+use bevy::sprite::Anchor;
 use bevy::window::PrimaryWindow;
 use rand::prelude::*;
 
@@ -71,7 +72,7 @@ pub enum FallingObjectKind {
 pub struct Basket {}
 
 #[derive(Component)]
-pub struct ScoreText {}
+pub struct ScoreText;
 
 #[derive(Resource)]
 pub struct FallingObjectSpawnTimer {
@@ -116,7 +117,7 @@ pub fn falling_object_movement(
 ) {
     for mut transform in object_query.iter_mut() {
         let direction = Vec3::new(0.0, -1.0, 0.0);
-        transform.translation += direction * BANANA_SPEED * time.delta_seconds();
+        transform.translation += direction * BANANA_SPEED * time.delta_secs();
     }
 }
 
@@ -174,11 +175,8 @@ pub fn spawn_falling_objects_over_time(
         };
 
         commands.spawn((
-            SpriteBundle {
-                transform: Transform::from_xyz(random_x, window.height(), 0.0),
-                texture,
-                ..default()
-            },
+            Sprite::from_image(texture),
+            Transform::from_xyz(random_x, window.height(), 0.0),
             FallingObject {
                 kind: object_kind,
                 points,
@@ -204,20 +202,15 @@ pub fn falling_object_hit_ground(
     }
 }
 
-#[derive(Component)]
-struct MainTheme;
-
 pub fn play_music(
     mut commands: Commands,
     asset_server: Res<AssetServer>
 ) {
     commands.spawn((
-        AudioBundle {
-            source: asset_server.load("audio/main_theme.ogg"),
-            settings: PlaybackSettings::LOOP.with_volume(Volume::new(1.0))
-        },
-        MainTheme
+        AudioPlayer::<AudioSource>(asset_server.load("audio/main_theme.ogg")), 
+        PlaybackSettings::LOOP.with_volume(Volume::new(1.0))
     ));
+
 }
 
 pub fn spawn_background(
@@ -227,35 +220,30 @@ pub fn spawn_background(
 ) {
     let window = window_query.get_single().unwrap();
 
-    commands.spawn(SpriteBundle {
-        transform: Transform::from_xyz(window.width() / 6.0, window.height() / 1.25, -1.0),
-        texture: asset_server.load("sprites/hot_air_balloon.png"),
-        ..default()
-    });
+    commands.spawn((
+        Sprite::from_image(asset_server.load("sprites/hot_air_balloon.png")),
+        Transform::from_xyz(window.width() / 6.0, window.height() / 1.25, -1.0)
+    ));
 
-    commands.spawn(SpriteBundle {
-        transform: Transform::from_xyz(window.width() / 1.5, window.height() / 4.5, -1.0),
-        texture: asset_server.load("sprites/tree.png"),
-        ..default()
-    });
+    commands.spawn((
+        Sprite::from_image(asset_server.load("sprites/tree.png")),
+        Transform::from_xyz(window.width() / 1.5, window.height() / 4.5, -1.0)
+    ));
 
-    commands.spawn(SpriteBundle {
-        transform: Transform::from_xyz(window.width() / 2.5, window.height() / 1.75, -1.0),
-        texture: asset_server.load("sprites/cloud_small.png"),
-        ..default()
-    });
+    commands.spawn((
+        Sprite::from_image(asset_server.load("sprites/cloud_small.png")),
+        Transform::from_xyz(window.width() / 2.5, window.height() / 1.75, -1.0)
+    ));
 
-    commands.spawn(SpriteBundle {
-        transform: Transform::from_xyz(window.width() / 1.1, window.height(), -1.0),
-        texture: asset_server.load("sprites/cloud_big.png"),
-        ..default()
-    });
+    commands.spawn((
+        Sprite::from_image(asset_server.load("sprites/cloud_big.png")),
+        Transform::from_xyz(window.width() / 1.1, window.height(), -1.0)
+    ));
 
-    commands.spawn(SpriteBundle {
-        transform: Transform::from_xyz(window.width() / 2.0, 119.0 / 2.0, -2.0),
-        texture: asset_server.load("sprites/ground.png"),
-        ..default()
-    });
+    commands.spawn((
+        Sprite::from_image(asset_server.load("sprites/ground.png")),
+        Transform::from_xyz(window.width() / 2.0, 119.0 / 2.0, -2.0)
+    ));
 }
 
 pub fn spawn_basket(
@@ -266,11 +254,8 @@ pub fn spawn_basket(
     let window = window_query.get_single().unwrap();
 
     commands.spawn((
-        SpriteBundle {
-            transform: Transform::from_xyz(window.width() / 2.0, BOUND_SIZE, 0.0),
-            texture: asset_server.load("sprites/basket.png"),
-            ..default()
-        },
+        Sprite::from_image(asset_server.load("sprites/basket.png")),
+        Transform::from_xyz(window.width() / 2.0, BOUND_SIZE, 0.0),
         Basket {},
     ));
 }
@@ -278,33 +263,32 @@ pub fn spawn_basket(
 pub fn spawn_camera(mut commands: Commands, window_query: Query<&Window, With<PrimaryWindow>>) {
     let window = window_query.get_single().unwrap();
 
-    commands.spawn(Camera2dBundle {
-        transform: Transform::from_xyz(window.width() / 2.0, window.height() / 2.0, 0.0),
-        ..default()
-    });
+    commands.spawn((
+        Camera2d,
+        Transform::from_xyz(window.width() / 2.0, window.height() / 2.0, 0.0)
+    ));
 }
 
-pub fn spawn_score_text(mut commands: Commands, asset_server: Res<AssetServer>, score: Res<Score>) {
+pub fn spawn_score_text(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
-        TextBundle {
-            text: Text::from_section(
-                format!("Score: {0}", score.value),
-                TextStyle {
-                    font: asset_server.load("fonts/FiraMono-Medium.ttf"),
-                    font_size: 60.0,
-                    color: Color::BLACK,
-                    ..default()
-                },
-            ),
+        Text::new("Score: "),
+        TextFont {
+            font: asset_server.load("fonts/FiraMono-Medium.ttf"),
+            font_size: 60.0,
             ..default()
-        }
-        .with_style(Style {
-            position_type: PositionType::Absolute,
-            top: Val::Px(5.0),
-            left: Val::Px(15.0),
+        },
+        TextColor::BLACK,
+        Anchor::TopLeft
+    ))
+    .with_child((
+        TextSpan::default(),
+        TextFont {
+            font: asset_server.load("fonts/FiraMono-Medium.ttf"),
+            font_size: 60.0,
             ..default()
-        }),
-        ScoreText {},
+        },
+        TextColor::BLACK,
+        ScoreText
     ));
 }
 
@@ -335,10 +319,13 @@ pub fn update_basket_position(
     }
 }
 
-pub fn update_score(mut score_text_query: Query<&mut Text, With<ScoreText>>, score: Res<Score>) {
+pub fn update_score(
+    mut score_text_query: Query<&mut TextSpan, With<ScoreText>>, 
+    score: Res<Score>
+) {
     if score.is_changed() {
-        if let Ok(mut text) = score_text_query.get_single_mut() {
-            text.sections[0].value = format!("Score: {0}", score.value);
+        for mut text in &mut score_text_query {
+            **text = format!("{0}", score.value);
         }
     }
 }
