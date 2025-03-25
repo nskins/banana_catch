@@ -323,7 +323,7 @@ pub fn update_basket_position(
     let window = window_query.get_single().unwrap();
 
     if let Ok(mut transform) = basket_query.get_single_mut() {
-        for event in events.iter() {
+        for event in events.read() {
             if event.position.x < BOUND_SIZE {
                 transform.translation.x = BOUND_SIZE;
             } else if event.position.x > window.width() - BOUND_SIZE {
@@ -347,7 +347,7 @@ fn close_on_escape(
     mut keyboard_input_events: EventReader<KeyboardInput>,
     mut app_exit_events: EventWriter<AppExit>,
 ) {
-    for event in keyboard_input_events.iter() {
+    for event in keyboard_input_events.read() {
         if event.key_code == Some(KeyCode::Escape) && event.state.is_pressed() {
             app_exit_events.send(AppExit);
         }
