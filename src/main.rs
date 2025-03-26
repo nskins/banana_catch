@@ -36,8 +36,8 @@ fn main() {
                 spawn_camera,
                 spawn_score_text,
                 play_music,
-                load_and_cache_images
-            )
+                load_and_cache_images,
+            ),
         )
         .add_systems(
             Update,
@@ -49,8 +49,8 @@ fn main() {
                 spawn_falling_objects_over_time,
                 update_basket_position,
                 update_score,
-                close_on_escape
-            )
+                close_on_escape,
+            ),
         )
         .run();
 }
@@ -201,15 +201,11 @@ pub fn falling_object_hit_ground(
     }
 }
 
-pub fn play_music(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>
-) {
+pub fn play_music(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
-        AudioPlayer::<AudioSource>(asset_server.load("audio/main_theme.ogg")), 
-        PlaybackSettings::LOOP.with_volume(Volume::new(1.0))
+        AudioPlayer::<AudioSource>(asset_server.load("audio/main_theme.ogg")),
+        PlaybackSettings::LOOP.with_volume(Volume::new(1.0)),
     ));
-
 }
 
 pub fn spawn_background(
@@ -221,27 +217,27 @@ pub fn spawn_background(
 
     commands.spawn((
         Sprite::from_image(asset_server.load("sprites/hot_air_balloon.png")),
-        Transform::from_xyz(window.width() / 6.0, window.height() / 1.25, -1.0)
+        Transform::from_xyz(window.width() / 6.0, window.height() / 1.25, -1.0),
     ));
 
     commands.spawn((
         Sprite::from_image(asset_server.load("sprites/tree.png")),
-        Transform::from_xyz(window.width() / 1.5, window.height() / 4.5, -1.0)
+        Transform::from_xyz(window.width() / 1.5, window.height() / 4.5, -1.0),
     ));
 
     commands.spawn((
         Sprite::from_image(asset_server.load("sprites/cloud_small.png")),
-        Transform::from_xyz(window.width() / 2.5, window.height() / 1.75, -1.0)
+        Transform::from_xyz(window.width() / 2.5, window.height() / 1.75, -1.0),
     ));
 
     commands.spawn((
         Sprite::from_image(asset_server.load("sprites/cloud_big.png")),
-        Transform::from_xyz(window.width() / 1.1, window.height(), -1.0)
+        Transform::from_xyz(window.width() / 1.1, window.height(), -1.0),
     ));
 
     commands.spawn((
         Sprite::from_image(asset_server.load("sprites/ground.png")),
-        Transform::from_xyz(window.width() / 2.0, 119.0 / 2.0, -2.0)
+        Transform::from_xyz(window.width() / 2.0, 119.0 / 2.0, -2.0),
     ));
 }
 
@@ -264,7 +260,7 @@ pub fn spawn_camera(mut commands: Commands, window_query: Query<&Window, With<Pr
 
     commands.spawn((
         Camera2d,
-        Transform::from_xyz(window.width() / 2.0, window.height() / 2.0, 0.0)
+        Transform::from_xyz(window.width() / 2.0, window.height() / 2.0, 0.0),
     ));
 }
 
@@ -275,23 +271,24 @@ pub fn spawn_score_text(mut commands: Commands, asset_server: Res<AssetServer>) 
         ..default()
     };
 
-    commands.spawn((
-        Text::new("Score: "),
-        font.clone(),
-        Node {
-            position_type: PositionType::Absolute,
-            top: Val::Px(5.0),
-            left: Val::Px(15.0),
-            ..default()
-        },
-        TextColor::BLACK
-    ))
-    .with_child((
-        TextSpan::default(),
-        font.clone(),
-        TextColor::BLACK,
-        ScoreText
-    ));
+    commands
+        .spawn((
+            Text::new("Score: "),
+            font.clone(),
+            Node {
+                position_type: PositionType::Absolute,
+                top: Val::Px(5.0),
+                left: Val::Px(15.0),
+                ..default()
+            },
+            TextColor::BLACK,
+        ))
+        .with_child((
+            TextSpan::default(),
+            font.clone(),
+            TextColor::BLACK,
+            ScoreText,
+        ));
 }
 
 pub fn tick_falling_object_spawn_timer(
@@ -322,8 +319,8 @@ pub fn update_basket_position(
 }
 
 pub fn update_score(
-    mut score_text_query: Query<&mut TextSpan, With<ScoreText>>, 
-    score: Res<Score>
+    mut score_text_query: Query<&mut TextSpan, With<ScoreText>>,
+    score: Res<Score>,
 ) {
     if score.is_changed() {
         for mut text in &mut score_text_query {
