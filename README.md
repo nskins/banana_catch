@@ -1,5 +1,7 @@
 # Banana Catch ![CI](https://github.com/nskins/banana_catch/actions/workflows/ci.yml/badge.svg)
 
+![Banana Catch gameplay](gameplay.png)
+
 The year is 203X. An advanced rogue artificial intelligence has stockpiled humanity's entire supply of bananas in a space station high above Earth. Global military powers have united as one to execute humanity's last hope: Operation K. Utilizing the latest research in software/hardware security, scholars have discovered a way to perform a remote code execution attack on the space station's control interface; however, there is only one practical option available - to open the escape hatch and release the bananas into the atmosphere!
 
 The remote code execution attack is a success! The bananas have been released and are now falling from the sky. Now it's your turn. Your role in this operation is to catch the bananas safely in your basket to distribute to the potassium-deprived people of Earth. It's time to accept the call to action. The fate of the world rests in your hands.
