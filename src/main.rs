@@ -204,7 +204,7 @@ pub fn falling_object_hit_ground(
 pub fn play_music(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         AudioPlayer::<AudioSource>(asset_server.load("audio/main_theme.ogg")),
-        PlaybackSettings::LOOP.with_volume(Volume::new(1.0)),
+        PlaybackSettings::LOOP.with_volume(Volume::Linear(1.0)),
     ));
 }
 
