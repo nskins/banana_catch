@@ -126,7 +126,7 @@ pub fn falling_object_hit_basket(
     basket_query: Query<&Transform, With<Basket>>,
     mut score: ResMut<Score>,
 ) {
-    if let Ok(basket_transform) = basket_query.get_single() {
+    if let Ok(basket_transform) = basket_query.single() {
         for (object_entity, object_transform, falling_object) in object_query.iter_mut() {
             let distance = object_transform
                 .translation
@@ -153,7 +153,7 @@ pub fn spawn_falling_objects_over_time(
     image_cache: Res<ImageCache>,
 ) {
     if falling_object_spawn_timer.timer.finished() {
-        let window = window_query.get_single().unwrap();
+        let window = window_query.single().unwrap();
 
         let bounds_width = window.width() - (2.0 * BOUND_SIZE);
 
@@ -204,7 +204,7 @@ pub fn falling_object_hit_ground(
 pub fn play_music(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         AudioPlayer::<AudioSource>(asset_server.load("audio/main_theme.ogg")),
-        PlaybackSettings::LOOP.with_volume(Volume::new(1.0)),
+        PlaybackSettings::LOOP.with_volume(Volume::Linear(1.0)),
     ));
 }
 
@@ -213,7 +213,7 @@ pub fn spawn_background(
     window_query: Query<&Window, With<PrimaryWindow>>,
     asset_server: Res<AssetServer>,
 ) {
-    let window = window_query.get_single().unwrap();
+    let window = window_query.single().unwrap();
 
     commands.spawn((
         Sprite::from_image(asset_server.load("sprites/hot_air_balloon.png")),
@@ -246,7 +246,7 @@ pub fn spawn_basket(
     window_query: Query<&Window, With<PrimaryWindow>>,
     asset_server: Res<AssetServer>,
 ) {
-    let window = window_query.get_single().unwrap();
+    let window = window_query.single().unwrap();
 
     commands.spawn((
         Sprite::from_image(asset_server.load("sprites/basket.png")),
@@ -256,7 +256,7 @@ pub fn spawn_basket(
 }
 
 pub fn spawn_camera(mut commands: Commands, window_query: Query<&Window, With<PrimaryWindow>>) {
-    let window = window_query.get_single().unwrap();
+    let window = window_query.single().unwrap();
 
     commands.spawn((
         Camera2d,
@@ -303,9 +303,9 @@ pub fn update_basket_position(
     window_query: Query<&Window, With<PrimaryWindow>>,
     mut basket_query: Query<&mut Transform, With<Basket>>,
 ) {
-    let window = window_query.get_single().unwrap();
+    let window = window_query.single().unwrap();
 
-    if let Ok(mut transform) = basket_query.get_single_mut() {
+    if let Ok(mut transform) = basket_query.single_mut() {
         for event in events.read() {
             if event.position.x < BOUND_SIZE {
                 transform.translation.x = BOUND_SIZE;
@@ -335,7 +335,7 @@ fn close_on_escape(
 ) {
     for event in keyboard_input_events.read() {
         if event.key_code == KeyCode::Escape && event.state.is_pressed() {
-            app_exit_events.send(AppExit::Success);
+            app_exit_events.write(AppExit::Success);
         }
     }
 }
